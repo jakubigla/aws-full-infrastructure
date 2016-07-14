@@ -1,0 +1,37 @@
+user www-data;
+worker_processes 4;
+pid /run/nginx.pid;
+
+events {
+	worker_connections 768;
+	# multi_accept on;
+}
+
+http {
+
+	sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	keepalive_timeout 2;
+	types_hash_max_size 2048;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	include /etc/nginx/conf.d/*.conf;
+
+	server {
+    	listen 8080 default_server;
+    	listen [::]:8080 default_server ipv6only=on;
+
+    	server_name _;
+    	location / {
+            proxy_pass http://app.{{ vpc_dns_zone }}:80;
+            proxy_pass_request_headers on;
+        }
+    }
+}
+

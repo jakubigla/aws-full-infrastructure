@@ -1,0 +1,19 @@
+- name: "Launch configuration for APP SG"
+  ec2_lc:
+    region: "{{ vpc_region }}"
+    name: "{{ prefix }}-app-lc"
+    image_id: "{{ ami_app.image_id }}"
+    key_name: "{{ ssh_key_name }}"
+    security_groups: ["{{ sg_ec2_app.group_id }}"]
+    instance_type: "{{ ec2_app_instance_type }}"
+  register: lc_app
+
+- name: "Launch configuration for WEB SG"
+  ec2_lc:
+    region: "{{ vpc_region }}"
+    name: "{{ prefix }}-web-lc"
+    image_id: "{{ ami_web.image_id }}"
+    key_name: "{{ ssh_key_name }}"
+    security_groups: ["{{ sg_ec2_web.group_id }}"]
+    instance_type: "{{ ec2_web_instance_type }}"
+  register: lc_web

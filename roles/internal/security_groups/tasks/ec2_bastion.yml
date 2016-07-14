@@ -1,0 +1,28 @@
+- name: Creating a Security Groups for Bastion server
+  ec2_group:
+    name: "{{ prefix }}-ec2-bastion-sg"
+    description: "Allows SSH proxing"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+    state: present
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+      - proto: icmp
+        from_port: 8
+        to_port:  -1
+        cidr_ip: 10.0.0.0/20
+  register: sg_ec2_bastion
+
+- name: Tag bastion SG
+  ec2_tag:
+    resource: "{{ sg_ec2_bastion.group_id }}"
+    region: "{{ vpc_region }}"
+    state: present
+    tags:
+      Name: "{{ prefix }}-ec2-bastion-sg"
+      Tier: "Bastion"
+      Type: "EC2"
+      Environment: "{{ env }}"

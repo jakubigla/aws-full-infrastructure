@@ -1,0 +1,61 @@
+- name: Get App instances
+  ec2_remote_facts:
+    region: "{{ vpc_region }}"
+    filters:
+      instance-state-name: running
+      "tag:Environment": "{{ env }}"
+      "tag:Role": "App"
+      "tag:Name": "{{ prefix }}*"
+      "tag:ForAmi": "Yes"
+  register: ec2_app
+
+- name: Create App AMI
+  ec2_ami:
+    instance_id: "{{ ec2_app.instances.0.id }}"
+    region: "{{ vpc_region }}"
+    name: "{{ prefix }}-app-ami"
+    wait: yes
+    tags:
+      Environment: "{{ env }}"
+      Role: "App"
+      Name: "{{ prefix }}-app-ami"
+  register: ami_app
+  when: ec2_app.instances.0 is defined
+
+- name: Get Web instances
+  ec2_remote_facts:
+    region: "{{ vpc_region }}"
+    filters:
+      instance-state-name: running
+      "tag:Environment": "{{ env }}"
+      "tag:Role": "Web"
+      "tag:Name": "{{ prefix }}*"
+      "tag:ForAmi": "Yes"
+  register: ec2_web
+
+- name: Create Web AMI
+  ec2_ami:
+    instance_id: "{{ ec2_web.instances.0.id }}"
+    region: "{{ vpc_region }}"
+    name: "{{ prefix }}-web-ami"
+    wait: yes
+    tags:
+      Environment: "{{ env }}"
+      Role: "Web"
+      Name: "{{ prefix }}-app-ami"
+  register: ami_web
+  when: ec2_web.instances.0 is defined
+
+- name: Remove instances that were created for AMI
+  ec2:
+    region: "{{ vpc_region }}"
+    state: "absent"
+    instance_id: "{{ item.id }}"
+  with_items: "{{ ec2_app.instances }}"
+
+- name: Remove instances that were created for AMI
+  ec2:
+    region: "{{ vpc_region }}"
+    state: "absent"
+    instance_id: "{{ item.id }}"
+  with_items: "{{ ec2_web.instances }}"

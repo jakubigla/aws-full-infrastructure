@@ -1,0 +1,28 @@
+- name: Scale Out policy for app
+  ec2_scaling_policy:
+    state: present
+    region: "{{ vpc_region }}"
+    name: "{{ prefix }}-app-sp-out"
+    adjustment_type: "ChangeInCapacity"
+    asg_name: "{{ asg_app.name }}"
+    scaling_adjustment: "-2"
+    min_adjustment_step: "2"
+    cooldown: "300"
+  register: sop_app
+
+- name: Create alarm metric for scale out policy for app
+  ec2_metric_alarm:
+    state: present
+    region: "{{ vpc_region }}"
+    name: "cpu-low"
+    metric: "CPUUtilization"
+    namespace: "AWS/EC2"
+    statistic: Average
+    comparison: "<="
+    threshold: 5.0
+    period: 100
+    evaluation_periods: 1
+    unit: "Percent"
+    description: "This will alarm when a app cpu usage average is lower than 5% for 5 minutes "
+    dimensions: {'AutoScalingGroupName':'{{ asg_app.name }}'}
+    alarm_actions: ['{{ sop_app["arn"] }}']

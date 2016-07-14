@@ -1,0 +1,6 @@
+- include: ec2_bastion.yml
+- include: elb_web.yml
+- include: ec2_web.yml
+- include: elb_app.yml
+- include: ec2_app.yml
+- include: ec2_proxy.yml

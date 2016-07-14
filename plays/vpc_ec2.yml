@@ -1,0 +1,24 @@
+- name: Setup Virtual Private Network for AWS
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  roles:
+    - vpc
+    - ec2key
+    - security_groups
+    - ec2_bastion
+    - ec2_proxy
+    - ec2_web
+    - ec2_app
+    - elb
+
+  post_tasks:
+    - name: Update hosts file
+      become: True
+      lineinfile:
+        dest: "/etc/hosts"
+        regexp: ".*bastion$"
+        line: "{{ ec2_bastion.instances.0.public_ip }} bastion"
+        state: present
+      when: ec2_bastion.instances.0 is defined
+

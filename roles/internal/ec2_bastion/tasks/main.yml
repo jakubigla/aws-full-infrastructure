@@ -1,0 +1,21 @@
+- name: Create an EC2 bastion instances
+  ec2:
+    keypair: "{{ ssh_key_name }}"
+    group_id: "{{ sg_ec2_bastion.group_id }}"
+    region: "{{ vpc_region }}"
+    instance_type: "{{ bastion_instance_type }}"
+    image: "{{ bastion_ami_id }}"
+    vpc_subnet_id: "{{ subnet_public_03 }}"
+    assign_public_ip: yes
+    wait: True
+    wait_timeout: 300
+    instance_tags:
+      Environment: "{{ env }}"
+      Name: "{{ prefix }}-bastion"
+      Role: "Bastion"
+    count_tag:
+      Environment: "{{ env }}"
+      Name: "{{ prefix }}-bastion"
+      Role: "Bastion"
+    exact_count: 1
+  register: ec2_bastion

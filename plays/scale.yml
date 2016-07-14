@@ -1,0 +1,11 @@
+- name: Create AMIs and configure ELB
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  roles:
+    - vpc
+    - security_groups
+    - ami
+    - ec2_lc
+    - asg
+    - scaling_policy

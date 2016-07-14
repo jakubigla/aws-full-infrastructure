@@ -1,0 +1,27 @@
+StrictHostKeyChecking no
+
+Host bastion
+  Hostname bastion
+  User ubuntu
+  IdentityFile ~/.ssh/id_rsa
+  PasswordAuthentication no
+  ForwardAgent yes
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ControlMaster auto
+  ControlPath ~/.ssh/ansible-%r@%h:%p
+  ControlPersist 15m
+  ProxyCommand none
+  LogLevel QUIET
+  StrictHostKeyChecking no
+  CheckHostIP no
+
+Host 10.0.*
+  User ubuntu
+  IdentityFile ~/.ssh/id_rsa
+  ServerAliveInterval 60
+  TCPKeepAlive yes
+  ProxyCommand ssh -W %h:%p ubuntu@bastion
+  LogLevel QUIET
+  StrictHostKeyChecking no
+  CheckHostIP no

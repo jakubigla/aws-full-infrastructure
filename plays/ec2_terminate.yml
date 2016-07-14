@@ -1,0 +1,19 @@
+- name: Spin up EC2 app instances
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: Get instances
+      ec2_remote_facts:
+        region: "{{ vpc_region }}"
+        filters:
+          instance-state-name: running
+          "tag:Name": "{{ prefix }}*"
+      register: ec2
+
+    - name: Terminate instances
+      ec2:
+        region: "{{ vpc_region }}"
+        state: absent
+        instance_id: "{{ item.id }}"
+      with_items: "{{ ec2.instances }}"

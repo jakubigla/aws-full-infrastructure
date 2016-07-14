@@ -1,0 +1,2 @@
+bastion_instance_type: t2.micro
+bastion_ami_id: "ami-f95ef58a" #ubuntu

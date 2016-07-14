@@ -1,0 +1,4 @@
+.vagrant
+*.retry
+secret_vars/*
+roles/external

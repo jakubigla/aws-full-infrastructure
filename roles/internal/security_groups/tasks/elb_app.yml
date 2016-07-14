@@ -1,0 +1,24 @@
+- name: Creating a Security Group for ELB
+  ec2_group:
+    name: "{{ prefix }}-elb-app-sg"
+    description: "Only http traffic from loadbalancer"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+    state: present
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ vpc_cidr }}"
+  register: sg_elb_app
+
+- name: Tag bastion SG
+  ec2_tag:
+    resource: "{{ sg_elb_app.group_id }}"
+    region: "{{ vpc_region }}"
+    state: present
+    tags:
+      Name: "{{ prefix }}-elb-app-sg"
+      Tier: "App"
+      Type: "ELB"
+      Environment: "{{ env }}"

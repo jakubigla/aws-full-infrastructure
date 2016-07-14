@@ -1,0 +1,46 @@
+- name: Setup proxy for APT
+  template:
+    src: 80proxy.j2
+    dest: /etc/apt/apt.conf.d/80proxy
+
+- name: Make sure apt-transport-https is installed
+  apt:
+    name: "apt-transport-https"
+    state: present
+
+- name: Add package to sources list
+  template:
+    src: varnish-cache.list.j2
+    dest: /etc/apt/sources.list.d/varnish-cache.list
+  register: varnishrepo
+
+- name: Add key for varnish repo
+  shell: 'curl -x "http://proxy.{{ vpc_dns_zone }}:{{ proxy_port }}" https://repo.varnish-cache.org/GPG-key.txt | apt-key add -'
+  when: varnishrepo.changed
+
+- name: Install Varnish and Nginx
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - varnish
+    - nginx
+
+- name: Configure Varnish port
+  template:
+    src: varnish/config.j2
+    dest: /etc/default/varnish
+  notify: restart varnish
+
+- name: Configure Varnish behaviour
+  template:
+    src: varnish/default.vcl.j2
+    dest: /etc/varnish/default.vcl
+  notify: restart varnish
+
+- name: Configure nginx to proxy to App ELB
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx

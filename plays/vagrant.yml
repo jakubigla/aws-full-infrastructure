@@ -1,0 +1,7 @@
+- name: Provision Vagrant box for running deployment script
+  hosts: all
+  become: True
+  remote_user: "{{ remote_user }}"
+  gather_facts: True
+  roles:
+   - vagrant_provision

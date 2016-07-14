@@ -1,0 +1,63 @@
+- name: Create ELB for App
+  ec2_elb_lb:
+    name: "{{ prefix }}-app-lb"
+    scheme: internal
+    state: present
+    region: "{{ vpc_region }}"
+    cross_az_load_balancing: yes
+    security_group_ids: '{{ sg_elb_app.group_id }}'
+    subnets:
+      - "{{ subnet_private_app_01 }}"
+      - "{{ subnet_private_app_02 }}"
+      - "{{ subnet_private_app_03 }}"
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+  register: elb_app
+  until: "elb_app.module_stderr is not defined"
+  retries: 2
+  delay: 1
+
+- name: Update DNS record
+  route53:
+    command: create
+    zone: "{{ vpc_dns_zone }}"
+    record: "app.{{ vpc_dns_zone }}"
+    type: CNAME
+    private_zone: True
+    vpc_id: "{{ vpc.vpc_id }}"
+    value: "{{ elb_app.elb.dns_name }}"
+    overwrite: yes
+
+- name: Create Internet Facing ELB
+  ec2_elb_lb:
+    name: "{{ prefix }}-web-lb"
+    scheme: internet-facing
+    state: present
+    region: "{{ vpc_region }}"
+    cross_az_load_balancing: yes
+    security_group_ids: '{{ sg_elb_web.group_id }}'
+    subnets:
+      - "{{ subnet_public_01 }}"
+      - "{{ subnet_public_02 }}"
+      - "{{ subnet_public_03 }}"
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 80
+  register: elb_web
+  until: "elb_web.module_stderr is not defined"
+  retries: 2
+  delay: 1
+
+- name: Update DNS record
+  route53:
+    command: create
+    zone: "{{ vpc_dns_zone }}"
+    record: "web.{{ vpc_dns_zone }}"
+    type: CNAME
+    private_zone: True
+    vpc_id: "{{ vpc.vpc_id }}"
+    value: "{{ elb_web.elb.dns_name }}"
+    overwrite: yes

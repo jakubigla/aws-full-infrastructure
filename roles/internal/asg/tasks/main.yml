@@ -1,0 +1,38 @@
+- name: "Create ASG for App"
+  ec2_asg:
+    name: "{{ prefix }}-app-asg"
+    load_balancers: ["{{ prefix }}-app-lb"]
+    launch_config_name: "{{ lc_app.name }}"
+    min_size: 2
+    max_size: 10
+    desired_capacity: 2
+    region: "{{ vpc_region }}"
+    vpc_zone_identifier:
+      - "{{ subnet_private_app_01 }}"
+      - "{{ subnet_private_app_02 }}"
+      - "{{ subnet_private_app_03 }}"
+    tags:
+      - propagate_at_launch: True
+      - Environment: "{{ env }}"
+      - Name: "{{ prefix }}-app"
+      - Role: "App"
+  register: asg_app
+
+- name: "Create ASG for Web"
+  ec2_asg:
+    name: "{{ prefix }}-web-asg"
+    load_balancers: ["{{ prefix }}-web-lb"]
+    launch_config_name: "{{ lc_web.name }}"
+    min_size: 2
+    max_size: 4
+    desired_capacity: 2
+    region: "{{ vpc_region }}"
+    vpc_zone_identifier:
+      - "{{ subnet_public_01 }}"
+      - "{{ subnet_public_02 }}"
+      - "{{ subnet_public_03 }}"
+    tags:
+      - propagate_at_launch: True
+      - Environment: "{{ env }}"
+      - Name: "{{ prefix }}-app"
+      - Role: "Web"

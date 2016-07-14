@@ -1,0 +1,28 @@
+- name: Creating a Security Group for App EC2 instances
+  ec2_group:
+    name: "{{ prefix }}-ec2-app-sg"
+    description: "App Security group. SSH from Bastion and http from ELB"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+    state: present
+    rules:
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        group_id: "{{ sg_elb_app.group_id }}"
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        group_id: "{{ sg_ec2_bastion.group_id }}"
+  register: sg_ec2_app
+
+- name: Tag app EC2 SG
+  ec2_tag:
+    resource: "{{ sg_ec2_app.group_id }}"
+    region: "{{ vpc_region }}"
+    state: present
+    tags:
+      Name: "{{ prefix }}-ec2-app-sg"
+      Tier: "App"
+      Type: "EC2"
+      Environment: "{{ env }}"

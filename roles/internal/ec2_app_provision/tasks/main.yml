@@ -1,0 +1,35 @@
+- name: Setup proxy for APT
+  template:
+    src: 80proxy.j2
+    dest: /etc/apt/apt.conf.d/80proxy
+
+- name: Add PHP7 repo to sources list
+  template:
+    src: ondrej-php-trusty.list.j2
+    dest: /etc/apt/sources.list.d/ondrej-php-trusty.list
+  register: phprepo
+
+- name: Add key for PHP7 repo
+  shell: 'apt-key adv --keyserver-options http-proxy="http://proxy.{{ vpc_dns_zone }}:{{ proxy_port }}" --keyserver keyserver.ubuntu.com --recv-keys 4F4EA0AAE5267A6C'
+  when: phprepo.changed
+
+- name: Install nginx and PHP packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+   - nginx
+   - php7.0-fpm
+
+- name: Configure PHP FPM
+  template:
+    src: phpfpm.conf.j2
+    dest: /etc/php/7.0/fpm/pool.d/www.conf
+  notify: restart php
+
+- name: Configure Nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx

@@ -1,0 +1,32 @@
+- name: Wait for SSH
+  connection: local
+  hosts: cache_servers,app_servers,proxy_servers
+  tasks:
+    - wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        timeout: 120
+        state: started
+      delegate_to: "bastion"
+
+- name: Provision EC2 proxy instances
+  hosts: proxy_servers
+  gather_facts: True
+  become: True
+  roles:
+    - ec2_proxy_provision
+
+- name: Provision EC2 app instances
+  hosts: app_servers
+  gather_facts: True
+  become: True
+  roles:
+    - ec2_app_provision
+    - ec2_app_deploy
+
+- name: Provision EC2 reverse proxy instances
+  hosts: cache_servers
+  gather_facts: True
+  become: True
+  roles:
+    - ec2_web_provision

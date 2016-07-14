@@ -1,0 +1,54 @@
+vpc_subnets:
+    #Public Subnet 1
+  - cidr: "{{ vpc_class }}.0.0/24"
+    az: "{{ vpc_az_a }}"
+    resource_tags: {
+      "Tier": "Web",
+      "Type": "Public",
+      "AZ": "{{ vpc_az_a }}",
+      "Name": "{{ prefix }}-{{ vpc_az_a }}-web-subnet"
+    }
+  - cidr: "{{ vpc_class }}.1.0/24"
+    az: "{{ vpc_az_b }}"
+    resource_tags: {
+      "Tier": "Web",
+      "Type": "Public",
+      "AZ": "{{ vpc_az_b }}",
+      "Name": "{{ prefix }}-{{ vpc_az_b }}-web-subnet"
+    }
+    #Public Subnet 3
+  - cidr: "{{ vpc_class }}.2.0/24"
+    az: "{{ vpc_az_c }}"
+    resource_tags: {
+      "Tier": "Web",
+      "Type": "Public",
+      "AZ": "{{ vpc_az_c }}",
+      "Name": "{{ prefix }}-{{ vpc_az_c }}-web-subnet"
+    }
+    #App private subnet 1
+  - cidr: "{{ vpc_class }}.3.0/24"
+    az: "{{ vpc_az_a }}"
+    resource_tags: {
+      "Tier": "App",
+      "Type": "Private",
+      "AZ": "{{ vpc_az_a }}",
+      "Name": "{{ prefix }}-{{ vpc_az_a }}-app-subnet"
+    }
+    #App private subnet 2
+  - cidr: "{{ vpc_class }}.4.0/24"
+    az: "{{ vpc_az_b }}"
+    resource_tags: {
+      "Tier": "App",
+      "Type": "Private",
+      "AZ": "{{ vpc_az_b }}",
+      "Name": "{{ prefix }}-{{ vpc_az_b }}-app-subnet"
+    }
+    #App private subnet 3
+  - cidr: "{{ vpc_class }}.5.0/24"
+    az: "{{ vpc_az_c }}"
+    resource_tags: {
+      "Tier": "App",
+      "Type": "Private",
+      "AZ": "{{ vpc_az_c }}",
+      "Name": "{{ prefix }}-{{ vpc_az_c }}-app-subnet"
+    }

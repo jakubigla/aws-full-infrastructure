@@ -1,0 +1,23 @@
+project_name: "gov-infra"
+prefix: "{{ project_name|lower }}-{{ env|lower }}"
+
+vpc_class: "10.0"
+vpc_cidr: "{{ vpc_class }}.0.0/20"
+vpc_region: "eu-west-1" # Ireland
+vpc_az_a: "{{ vpc_region }}a"
+vpc_az_b: "{{ vpc_region }}b"
+vpc_az_c: "{{ vpc_region }}c"
+vpc_dns_zone: "{{ env|lower }}.{{ project_name|lower }}.aws"
+
+proxy_port: 3128
+ssh_key_name: "{{ prefix }}-key"
+
+remote_user: "ubuntu"
+
+ec2_app_instance_type: t2.micro
+ec2_app_instance_count: 1
+ec2_app_ami_id: "ami-f95ef58a" #ubuntu
+
+ec2_web_instance_type: t2.micro
+ec2_web_instance_count: 1
+ec2_web_ami_id: "ami-f95ef58a" #ubuntu

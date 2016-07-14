@@ -1,0 +1,32 @@
+- name: Creating a Security Groups for Proxy server
+  ec2_group:
+    name: "{{ prefix }}-ec2-proxy-sg"
+    description: "Allows proxing from private subnets"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc.vpc_id }}"
+    state: present
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        group_id: "{{ sg_ec2_bastion.group_id }}"
+      - proto: tcp
+        from_port: "{{ proxy_port }}"
+        to_port: "{{ proxy_port }}"
+        group_id: "{{ sg_ec2_app.group_id }}"
+      - proto: tcp
+        from_port: "{{ proxy_port }}"
+        to_port: "{{ proxy_port }}"
+        group_id: "{{ sg_ec2_web.group_id }}"
+  register: sg_ec2_proxy
+
+- name: Tag Proxy SG
+  ec2_tag:
+    resource: "{{ sg_ec2_proxy.group_id }}"
+    region: "{{ vpc_region }}"
+    state: present
+    tags:
+      Name: "{{ prefix }}-ec2-proxy-sg"
+      Tier: "Proxy"
+      Type: "EC2"
+      Environment: "{{ env }}"
